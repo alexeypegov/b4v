@@ -11,6 +11,13 @@ import (
 )
 
 func main() {
+  db, err := model.OpenDB("./b4v.db")
+  if err != nil {
+    panic(err)
+  }
+
+	defer db.Close()
+
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: b4v command")
 		return
@@ -21,7 +28,7 @@ func main() {
 		if len(os.Args) < 3 {
 			fmt.Println("Usage: b4v populate <backup.json>")
 		} else {
-			model.Populate(os.Args[2])
+			model.Populate(os.Args[2], db)
 		}
 		break
 	case "start":

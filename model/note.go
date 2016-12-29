@@ -30,9 +30,9 @@ type Note struct {
 }
 
 // SaveAll save all the given Notes
-func SaveAll(notes []Note) error {
+func SaveAll(notes []Note, db *DB) error {
 	for _, n := range notes {
-		if err := n.Save(false); err != nil {
+		if err := n.Save(false, db); err != nil {
 			return err
 		}
 	}
@@ -40,12 +40,23 @@ func SaveAll(notes []Note) error {
 	return nil
 }
 
+// Load loads Note by its uuid
+func (note *Note) Load(uuid string, db *DB) error {
+	bytes, err := db.Get(notesBucket, uuid)
+	if err != nil {
+		return err
+	}
+
+	json.Unmarshal(bytes, &note)
+	return nil
+}
+
 // Save Note to a storage
-func (note *Note) Save(draft bool) error {
+func (note *Note) Save(draft bool, db *DB) error {
 	note.Flags |= Draft
 	note.CreatedAt = time.Now()
 
-	if err := DB.Update(func(tx *bolt.Tx) error {
+	if err := db.Handle.Update(func(tx *bolt.Tx) error {
 		bucketNotes, err := tx.CreateBucketIfNotExists([]byte(notesBucket))
 		if err != nil {
 			return err

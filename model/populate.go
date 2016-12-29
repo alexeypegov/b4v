@@ -32,13 +32,13 @@ type oldNote struct {
 }
 
 // Populate import all the notes from the old format backup file
-func Populate(filename string) error {
+func Populate(filename string, db *DB) error {
 	notes, err := ImportOldNotes(filename)
 	if err != nil {
 		return err
 	}
 
-	if err := SaveAll(notes); err != nil {
+	if err := SaveAll(notes, db); err != nil {
 		return err
 	}
 
