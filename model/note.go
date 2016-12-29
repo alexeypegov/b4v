@@ -40,15 +40,16 @@ func SaveAll(notes []Note, db *DB) error {
 	return nil
 }
 
-// Load loads Note by its uuid
-func (note *Note) Load(uuid string, db *DB) error {
+// GetNote loads Note by its uuid
+func GetNote(uuid string, db *DB) (*Note, error) {
 	bytes, err := db.Get(notesBucket, uuid)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	json.Unmarshal(bytes, &note)
-	return nil
+	result := new(Note)
+	json.Unmarshal(bytes, &result)
+	return result, nil
 }
 
 // Save Note to a storage
