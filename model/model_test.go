@@ -5,20 +5,16 @@ import (
   "io/ioutil"
 )
 
-type TestDB struct {
-  *DB
-}
-
-func NewTestDB() *TestDB {
+func NewTestDB() *DB {
   db, err := OpenDB(tempfile())
   if err != nil {
     panic(err)
   }
 
-  return &TestDB{db}
+  return db
 }
 
-func (db *TestDB) CloseAndDestroy() {
+func CloseAndDestroy(db *DB) {
   defer os.Remove(db.Path())
   db.Close()
 }
