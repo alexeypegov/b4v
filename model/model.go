@@ -7,7 +7,7 @@ import (
 
 // DB database handler
 type DB struct {
-	Handle *bolt.DB
+	*bolt.DB
 }
 
 // OpenDB opens existing or initializes new db
@@ -22,7 +22,7 @@ func OpenDB(file string) (*DB, error) {
 
 // Close closes database
 func (db *DB) Close() {
-	if err := db.Handle.Close(); err != nil {
+	if err := db.DB.Close(); err != nil {
 		panic(err)
 	}
 }
@@ -30,7 +30,7 @@ func (db *DB) Close() {
 // Get load entry from bucket
 func (db *DB) Get(bucket string, id string) ([]byte, error) {
 	var result []byte
-	err := db.Handle.View(func(tx *bolt.Tx) error {
+	err := db.DB.View(func(tx *bolt.Tx) error {
 		_bucket := tx.Bucket([]byte(bucket))
 		if _bucket == nil {
 			return fmt.Errorf("Bucket %s was not found!", bucket)

@@ -5,14 +5,22 @@ import (
   "io/ioutil"
 )
 
-// MustOpenDB return a new, open DN at a temporary location
-func OpenTestDB() *DB {
+type TestDB struct {
+  *DB
+}
+
+func NewTestDB() *TestDB {
   db, err := OpenDB(tempfile())
   if err != nil {
     panic(err)
   }
 
-  return db
+  return &TestDB{db}
+}
+
+func (db *TestDB) CloseAndDestroy() {
+  defer os.Remove(db.Path())
+  db.Close()
 }
 
 func tempfile() string {

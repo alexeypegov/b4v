@@ -14,16 +14,16 @@ const (
 	notesBucket = "notes"
 )
 
-var (
-	uuidRegexp = regexp.MustCompile("([\\s\\pP\\pS]+)")
-)
-
 const (
 	// Draft determines whatever this note is published or not
 	Draft byte = 1 << iota
 
 	// PlainHTML format of the entry
 	PlainHTML
+)
+
+var (
+	uuidRegexp = regexp.MustCompile("([\\s\\pP\\pS]+)")
 )
 
 // Note is a note, yeah
@@ -38,10 +38,16 @@ type Note struct {
 
 // SaveAll save all the given Notes
 func SaveAll(notes []Note, db *DB) error {
-	for _, n := range notes {
-		if err := n.Save(false, db); err != nil {
-			return err
+	if err := db.Update(func(tx *bolt.Tx) error {
+		for _, n := range notes {
+			if err := saveInt(&n, false, tx); err != nil {
+				return err
+			}
 		}
+
+		return nil
+	}); err != nil {
+		return err
 	}
 
 	return nil
@@ -66,27 +72,34 @@ func genUUID(title string) string {
 	return fmt.Sprintf("%4d%2d%2d-%s", time.Year(), time.Month(), time.Day(), replaced)
 }
 
-// Save Note to a storage
-func (note *Note) Save(draft bool, db *DB) error {
-	note.Flags |= Draft
+func saveInt(note *Note, draft bool, tx *bolt.Tx) error {
+	bucketNotes, err := tx.CreateBucketIfNotExists([]byte(notesBucket))
+	if err != nil {
+		return err
+	}
+
+	if len(note.UUID) == 0 {
+		note.UUID = genUUID(note.Title)
+	}
+
+	if draft {
+		note.Flags |= Draft
+	}
+
 	note.CreatedAt = time.Now()
 
-	if err := db.Handle.Update(func(tx *bolt.Tx) error {
-		bucketNotes, err := tx.CreateBucketIfNotExists([]byte(notesBucket))
-		if err != nil {
-			return err
-		}
+	jsonNote, _ := json.Marshal(note)
+	if err := bucketNotes.Put([]byte(note.UUID), []byte(jsonNote)); err != nil {
+		return err
+	}
 
-		if len(note.UUID) == 0 {
-			note.UUID = genUUID(note.Title)
-		}
+	return nil
+}
 
-		jsonNote, _ := json.Marshal(note)
-		if err := bucketNotes.Put([]byte(note.UUID), []byte(jsonNote)); err != nil {
-			return err
-		}
-
-		return nil
+// Save Note to an underlying storage
+func (note *Note) Save(draft bool, db *DB) error {
+	if err := db.DB.Update(func(tx *bolt.Tx) error {
+		return saveInt(note, draft, tx)
 	}); err != nil {
 		return err
 	}

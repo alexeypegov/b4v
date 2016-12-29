@@ -7,16 +7,16 @@ import (
 )
 
 func TestSaveAndLoad(t *testing.T) {
-	db := OpenTestDB()
-	defer db.Close()
+	db := NewTestDB()
+	defer db.CloseAndDestroy()
 
 	note := Note{UUID: "something-interesting", Title: "title", Content: "Some content"}
 
-	if err := note.Save(true, db); err != nil {
+	if err := note.Save(true, db.DB); err != nil {
 		t.Error("Unable to save note:", err)
 	}
 
-	loaded, err := GetNote("something-interesting", db)
+	loaded, err := GetNote("something-interesting", db.DB)
 	if err != nil {
 		t.Error(err)
 	}
@@ -27,15 +27,15 @@ func TestSaveAndLoad(t *testing.T) {
 }
 
 func TestNotExistingNote(t *testing.T) {
-	db := OpenTestDB()
-	defer db.Close()
+	db := NewTestDB()
+	defer db.CloseAndDestroy()
 
 	note := Note{UUID: "abc"}
-	if err := note.Save(false, db); err != nil {
+	if err := note.Save(false, db.DB); err != nil {
 		t.Error("Unable to save note:", err)
 	}
 
-	loaded, err := GetNote("not-existing", db)
+	loaded, err := GetNote("not-existing", db.DB)
 	if err != nil {
 		t.Error("Error loading Note")
 	}
@@ -66,14 +66,14 @@ func TestGenerateUUID(t *testing.T) {
 }
 
 func TestAssingUUID(t *testing.T) {
-	db := OpenTestDB()
-	defer db.Close()
+	db := NewTestDB()
+	defer db.CloseAndDestroy()
 
   now := time.Now()
 	uuid := fmt.Sprintf("%d%d%d-а-тут-у-нас-будет-какой-то-такой-заголовок", now.Year(), now.Month(), now.Day())
 
 	note := Note{Title: "А тут у нас будет какой-то такой заголовок", Content: "nope"}
-	if err := note.Save(false, db); err != nil {
+	if err := note.Save(false, db.DB); err != nil {
 		t.Error("Unable to save note:", err)
 	}
 
@@ -81,7 +81,7 @@ func TestAssingUUID(t *testing.T) {
 		t.Errorf("UUID should be assigned, found: '%s' (should be '%s')", note.UUID, uuid)
 	}
 
-	loaded, err := GetNote(uuid, db)
+	loaded, err := GetNote(uuid, db.DB)
 	if err != nil {
 		t.Error("Unable to load note by newly getnerated UUID")
 	}
