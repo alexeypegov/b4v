@@ -46,30 +46,30 @@ func TestNotExistingNote(t *testing.T) {
 }
 
 func TestGenerateUUID(t *testing.T) {
-  now := time.Now()
+	now := time.Now()
 	prefix := fmt.Sprintf("%4d%2d%2d", now.Year(), now.Month(), now.Day())
 
-  s := genUUID("hello");
-  if s != prefix + "-hello" {
-    t.Errorf("Invalid uuid generated: '%s'", s)
-  }
+	s := genUUID("hello")
+	if s != prefix+"-hello" {
+		t.Errorf("Invalid uuid generated: '%s'", s)
+	}
 
-  s = genUUID("ЮНИКОД и 123")
-  if s != prefix + "-юникод-и-123" {
-    t.Errorf("Invalid uuid generated: '%s'", s)
-  }
+	s = genUUID("ЮНИКОД и 123")
+	if s != prefix+"-юникод-и-123" {
+		t.Errorf("Invalid uuid generated: '%s'", s)
+	}
 
-  s = genUUID("разное &^%$#@!*(){}[]?/\\ такое")
-  if s != prefix + "-разное-такое" {
-    t.Errorf("Invalid uuid generated: '%s'", s)
-  }
+	s = genUUID("разное &^%$#@!*(){}[]?/\\ такое")
+	if s != prefix+"-разное-такое" {
+		t.Errorf("Invalid uuid generated: '%s'", s)
+	}
 }
 
 func TestAssingUUID(t *testing.T) {
 	db := NewTestDB()
 	defer CloseAndDestroy(db)
 
-  now := time.Now()
+	now := time.Now()
 	uuid := fmt.Sprintf("%d%d%d-а-тут-у-нас-будет-какой-то-такой-заголовок", now.Year(), now.Month(), now.Day())
 
 	note := Note{Title: "А тут у нас будет какой-то такой заголовок", Content: "nope"}
@@ -77,7 +77,7 @@ func TestAssingUUID(t *testing.T) {
 		t.Error("Unable to save note:", err)
 	}
 
-  if uuid != note.UUID {
+	if uuid != note.UUID {
 		t.Errorf("UUID should be assigned, found: '%s' (should be '%s')", note.UUID, uuid)
 	}
 
@@ -90,7 +90,7 @@ func TestAssingUUID(t *testing.T) {
 		t.Errorf("UUID should be assigned, found: '%s'", loaded.UUID)
 	}
 
-  if "nope" != loaded.Content {
+	if "nope" != loaded.Content {
 		t.Errorf("Content is different from the expected one, found: '%s'", loaded.Content)
 	}
 }
