@@ -2,6 +2,9 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/boltdb/bolt"
@@ -9,6 +12,10 @@ import (
 
 const (
 	notesBucket = "notes"
+)
+
+var (
+	uuidRegexp = regexp.MustCompile("([\\s\\pP\\pS]+)")
 )
 
 const (
@@ -52,6 +59,13 @@ func GetNote(uuid string, db *DB) (*Note, error) {
 	return result, nil
 }
 
+func genUUID(title string) string {
+	time := time.Now()
+
+	replaced := strings.ToLower(uuidRegexp.ReplaceAllLiteralString(title, "-"))
+	return fmt.Sprintf("%4d%2d%2d-%s", time.Year(), time.Month(), time.Day(), replaced)
+}
+
 // Save Note to a storage
 func (note *Note) Save(draft bool, db *DB) error {
 	note.Flags |= Draft
@@ -63,8 +77,8 @@ func (note *Note) Save(draft bool, db *DB) error {
 			return err
 		}
 
-		if len(note.UUID) < 1 {
-			note.UUID = "todo" // todo
+		if len(note.UUID) == 0 {
+			note.UUID = genUUID(note.Title)
 		}
 
 		jsonNote, _ := json.Marshal(note)

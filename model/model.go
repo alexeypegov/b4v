@@ -21,12 +21,10 @@ func OpenDB(file string) (*DB, error) {
 }
 
 // Close closes database
-func (db *DB) Close() error {
+func (db *DB) Close() {
 	if err := db.Handle.Close(); err != nil {
-		return err
+		panic(err)
 	}
-
-	return nil
 }
 
 // Get load entry from bucket

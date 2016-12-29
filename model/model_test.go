@@ -5,27 +5,14 @@ import (
   "io/ioutil"
 )
 
-type TestDB struct {
-  *DB
-  File string
-}
-
 // MustOpenDB return a new, open DN at a temporary location
-func OpenTestDB() *TestDB {
-  file := tempfile()
-  db, err := OpenDB(file)
+func OpenTestDB() *DB {
+  db, err := OpenDB(tempfile())
   if err != nil {
     panic(err)
   }
 
-  return &TestDB{DB: db, File: file}
-}
-
-// CloseTestDB closes the database and deletes the underlying file; panic on error
-func (db *TestDB) CloseTestDB() {
-  if err := db.Close(); err != nil {
-    panic(err)
-  }
+  return db
 }
 
 func tempfile() string {
