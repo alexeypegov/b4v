@@ -65,7 +65,7 @@ func TestGenerateUUID(t *testing.T) {
 	}
 }
 
-func TestAssingUUID(t *testing.T) {
+func TestAssignUUID(t *testing.T) {
 	db := NewTestDB()
 	defer CloseAndDestroy(db)
 
