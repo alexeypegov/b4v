@@ -11,7 +11,8 @@ import (
 )
 
 const (
-	notesBucket = "notes"
+	// NotesBucket contains notes bucket name
+	NotesBucket = "notes"
 )
 
 const (
@@ -55,7 +56,7 @@ func SaveAll(notes []Note, db *DB) error {
 
 // GetNote loads Note by its uuid
 func GetNote(uuid string, db *DB) (*Note, error) {
-	bytes, err := db.Get(notesBucket, uuid)
+	bytes, err := db.Get(NotesBucket, uuid)
 	if err != nil {
 		return nil, err
 	}
@@ -69,11 +70,11 @@ func genUUID(title string) string {
 	time := time.Now()
 
 	replaced := strings.ToLower(uuidRegexp.ReplaceAllLiteralString(title, "-"))
-	return fmt.Sprintf("%4d%2d%2d-%s", time.Year(), time.Month(), time.Day(), replaced)
+	return fmt.Sprintf("%d%02d%02d-%s", time.Year(), time.Month(), time.Day(), replaced)
 }
 
 func saveInt(note *Note, draft bool, tx *bolt.Tx) error {
-	bucketNotes, err := tx.CreateBucketIfNotExists([]byte(notesBucket))
+	bucketNotes, err := tx.CreateBucketIfNotExists([]byte(NotesBucket))
 	if err != nil {
 		return err
 	}
@@ -86,7 +87,9 @@ func saveInt(note *Note, draft bool, tx *bolt.Tx) error {
 		note.Flags |= Draft
 	}
 
-	note.CreatedAt = time.Now()
+	if note.CreatedAt.IsZero() {
+		note.CreatedAt = time.Now()
+	}
 
 	jsonNote, _ := json.Marshal(note)
 	if err := bucketNotes.Put([]byte(note.UUID), []byte(jsonNote)); err != nil {

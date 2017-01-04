@@ -47,7 +47,7 @@ func TestNotExistingNote(t *testing.T) {
 
 func TestGenerateUUID(t *testing.T) {
 	now := time.Now()
-	prefix := fmt.Sprintf("%4d%2d%2d", now.Year(), now.Month(), now.Day())
+	prefix := fmt.Sprintf("%d%02d%02d", now.Year(), now.Month(), now.Day())
 
 	s := genUUID("hello")
 	if s != prefix+"-hello" {
@@ -65,12 +65,27 @@ func TestGenerateUUID(t *testing.T) {
 	}
 }
 
+func TestKeepOriginalCreatedAtOnSave(t *testing.T) {
+	db := NewTestDB()
+	defer CloseAndDestroy(db)
+
+	ts, _ := time.Parse(time.RFC822, "11 Nov 79 22:23 MSK")
+	note := Note{Title: "Keep trying", CreatedAt: ts}
+	if err := note.Save(false, db); err != nil {
+		t.Error("Unable to save note", err)
+	}
+
+	if !note.CreatedAt.Equal(ts) {
+		t.Errorf("CreatedAt should not be overwritten (%v vs %v)", ts, note.CreatedAt)
+	}
+}
+
 func TestAssignUUID(t *testing.T) {
 	db := NewTestDB()
 	defer CloseAndDestroy(db)
 
 	now := time.Now()
-	uuid := fmt.Sprintf("%d%d%d-а-тут-у-нас-будет-какой-то-такой-заголовок", now.Year(), now.Month(), now.Day())
+	uuid := fmt.Sprintf("%d%02d%02d-а-тут-у-нас-будет-какой-то-такой-заголовок", now.Year(), now.Month(), now.Day())
 
 	note := Note{Title: "А тут у нас будет какой-то такой заголовок", Content: "nope"}
 	if err := note.Save(false, db); err != nil {
