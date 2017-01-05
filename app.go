@@ -13,6 +13,7 @@ import (
 )
 
 const (
+	port   = 8080
 	dbFile = "./b4v.db"
 )
 
@@ -42,28 +43,29 @@ func main() {
 	}
 	defer db.Close()
 
-	if len(os.Args) < 2 {
-		fmt.Println("Usage: b4v command (commands are: populate, start)")
+	if len(os.Args) == 2 {
+		fmt.Print(fmt.Sprintf("Using import file '%s'... ", os.Args[1]))
+		notesCount, err := model.Populate(os.Args[1], db)
+		if err != nil {
+			fmt.Println(fmt.Sprintf("fail (%s)", err.Error()))
+			return
+		}
+
+		fmt.Println(fmt.Sprintf("ok [%d notes]", notesCount))
+	}
+
+	fmt.Print("Rebuilding index... ")
+	if err := model.RebuildIndex(db); err != nil {
+		fmt.Println(fmt.Sprintf("fail (%s)", err.Error()))
 		return
 	}
 
-	switch os.Args[1] {
-	case "populate":
-		if len(os.Args) < 3 {
-			fmt.Println("Usage: b4v populate <backup.json>")
-		} else {
-			if err := model.Populate(os.Args[2], db); err != nil {
-				panic(err)
-			}
-		}
-		break
-	case "start":
-		context := &controller.Context{DB: db}
-		mux := pat.New()
-		mux.Get("/note/:id", handler{context, controller.NoteHandler})
-		n := negroni.Classic()
-		n.UseHandler(mux)
-		n.Run(":3000")
-		break
-	}
+	fmt.Println("ok")
+
+	context := &controller.Context{DB: db}
+	mux := pat.New()
+	mux.Get("/note/:id", handler{context, controller.NoteHandler})
+	n := negroni.Classic()
+	n.UseHandler(mux)
+	n.Run(fmt.Sprintf(":%d", port))
 }
