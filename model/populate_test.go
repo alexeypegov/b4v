@@ -9,38 +9,76 @@ import (
 )
 
 func TestUnmarshalling(t *testing.T) {
-	data := []byte("[{\"title\": \"GoGo Penguin Live from Old Grenada Studios\",\"date\": \"29 Ноября 2016\",\"url\": \"/note/gogo-penguin-live-from-old-grenada-studios\",\"tags\": [\"слушаю\"],\"content\": \"<div></div>\"}]")
+	data := []byte(`[
+{
+	"title": "GoGo Penguin Live from Old Grenada Studios",
+	"date" : "29 Ноября 2016",
+	"url"  : "/note/gogo-penguin-live-from-old-grenada-studios",
+	"tags" : ["слушаю"],
+	"content": "<div></div>"
+}]`)
 
 	var notes []oldNote
-  if err := json.Unmarshal(data, &notes); err != nil {
-    t.Error(err)
-  }
+	if err := json.Unmarshal(data, &notes); err != nil {
+		t.Error(err)
+	}
 
-  if len(notes) != 1 {
-    t.Error("Should unmarshal exactly one entry")
-  }
+	if len(notes) != 1 {
+		t.Error("Should unmarshal exactly one entry")
+	}
 
-  note := notes[0]
-  if note.Title != "GoGo Penguin Live from Old Grenada Studios" {
-    t.Error("Error unmarshalling title")
-  }
+	note := notes[0]
+	if note.Title != "GoGo Penguin Live from Old Grenada Studios" {
+		t.Error("Error unmarshalling title")
+	}
 
-  formattedDate := note.Date.Format(time.RFC822)
-  if "29 Nov 16 12:00 MSK" != formattedDate {
-    t.Error("Error unmarshalling date", formattedDate)
-  }
+	formattedDate := note.Date.Format(time.RFC822)
+	if "29 Nov 16 12:00 MSK" != formattedDate {
+		t.Error("Error unmarshalling date", formattedDate)
+	}
 
-  if note.Content != "<div></div>" {
-    t.Error("Error unmarshalling content")
-  }
+	if note.Content != "<div></div>" {
+		t.Error("Error unmarshalling content")
+	}
 
-  if !reflect.DeepEqual(note.Tags, []string{"слушаю"}) {
-    t.Error("Error unmarshalling tags", note.Tags)
-  }
+	if !reflect.DeepEqual(note.Tags, []string{"слушаю"}) {
+		t.Error("Error unmarshalling tags", note.Tags)
+	}
 
-  if "gogo-penguin-live-from-old-grenada-studios" != note.UUID {
-    t.Error("Error unmarshalling UUID", note.UUID)
-  }
+	if "gogo-penguin-live-from-old-grenada-studios" != note.UUID {
+		t.Error("Error unmarshalling UUID", note.UUID)
+	}
+}
+
+func TestIncrementTimeForDuplicateEntries(t *testing.T) {
+	data := []byte(`[
+{"title": "One",
+ "date" : "29 Ноября 2016",
+ "url"  : "/note/one",
+ "tags" : ["слушаю"],
+ "content": "<div></div>"
+},
+{"title": "Two",
+ "date" : "29 Ноября 2016",
+ "url"  : "/note/two",
+ "tags" : ["слушаю"],
+ "content": "<div></div>"
+}]`)
+
+	var notes []oldNote
+	if err := json.Unmarshal(data, &notes); err != nil {
+		t.Error(err)
+	}
+
+	if len(notes) != 2 {
+		t.Error("Should unmarshal exactly two enties")
+	}
+
+	converted := ConvertNotes(notes)
+
+	if converted[0].CreatedAt.Equal(converted[1].CreatedAt) {
+		t.Errorf("Should increment duplicate time (%v and %v)", converted[0].CreatedAt, converted[1].CreatedAt)
+	}
 }
 
 func TestToNote(t *testing.T) {
@@ -66,7 +104,7 @@ func TestToNote(t *testing.T) {
 		t.Error("Tags should be migrated")
 	}
 
-  if result.Flags & PlainHTML != PlainHTML {
-    t.Error("Old entries should be migrated as PlainHTML")
-  }
+	if result.Flags&PlainHTML != PlainHTML {
+		t.Error("Old entries should be migrated as PlainHTML")
+	}
 }

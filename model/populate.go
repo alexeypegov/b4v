@@ -1,12 +1,13 @@
 package model
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"strings"
 	"time"
 
-	"encoding/json"
+	"github.com/boltdb/bolt"
 )
 
 var monthsMapping = map[string]time.Month{
@@ -32,17 +33,28 @@ type oldNote struct {
 }
 
 // Populate import all the notes from the old format backup file
-func Populate(filename string, db *DB) error {
+func Populate(filename string, db *DB) (int, error) {
 	notes, err := ImportOldNotes(filename)
 	if err != nil {
-		return err
+		return -1, err
+	}
+
+	if err := db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(NotesBucket))
+		if bucket != nil {
+			return fmt.Errorf("Existing Notes bucket was found")
+		}
+
+		return nil
+	}); err != nil {
+		return -1, err
 	}
 
 	if err := SaveAll(notes, db); err != nil {
-		return err
+		return -1, err
 	}
 
-	return nil
+	return len(notes), nil
 }
 
 // ImportOldNotes imports notes from an old format backup file
@@ -57,14 +69,33 @@ func ImportOldNotes(filename string) ([]Note, error) {
 		return nil, err
 	}
 
-	fmt.Println("Read", len(notes), "notes")
+	result := ConvertNotes(notes)
+	return result, nil
+}
+
+// ConvertNotes converts slice of old notes to the new format (and fixes duplicate time)
+func ConvertNotes(notes []oldNote) []Note {
+	timestamps := make(map[int]bool, len(notes))
 
 	result := make([]Note, len(notes))
 	for i, n := range notes {
-		result[i] = n.toNote()
+		converted := n.toNote()
+
+		for {
+			createdAt := converted.CreatedAt
+			if _, existing := timestamps[int(createdAt.Unix())]; existing {
+				converted.CreatedAt = createdAt.Add(time.Hour * 1)
+			} else {
+
+				timestamps[int(converted.CreatedAt.Unix())] = true
+				break
+			}
+		}
+
+		result[i] = converted
 	}
 
-	return result, nil
+	return result
 }
 
 func (n *oldNote) toNote() Note {
