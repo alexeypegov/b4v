@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"path/filepath"
+	"time"
 
 	"github.com/alexeypegov/b4v/model"
 )
@@ -21,6 +22,9 @@ type Data struct {
 var funcMap = template.FuncMap{
 	"html": func(s string) template.HTML {
 		return template.HTML(s)
+	},
+	"timestamp": func(ts time.Time) string {
+		return fmt.Sprintf("%02d/%02d/%4d", ts.Day(), ts.Month(), ts.Year())
 	},
 }
 

@@ -12,7 +12,7 @@ import (
 func TestRenderNote(t *testing.T) {
 	tpl := New(".")
 
-	ts, _ := time.Parse(time.RFC822, "11 Nov 79 22:23 MSK")
+	ts, _ := time.Parse(time.RFC822, "04 Nov 79 22:23 MSK")
 	note := &model.Note{Title: "first", Content: "<h1>first content</h1>", Tags: []string{"саптрю", "слушаю"}, CreatedAt: ts}
 
 	w := bytes.NewBufferString("")
@@ -28,7 +28,7 @@ func TestRenderNote(t *testing.T) {
 <body>
 <div class="note">
   <div class="title">first</div>
-  <div class="date">1979-11-11 22:23:00 &#43;0000 MSK</div>
+  <div class="date">04/11/1979</div>
   <div class="tags"><div class="tag">саптрю</div><div class="tag">слушаю</div></div>
   <div class="body"><h1>first content</h1></div>
 </div>
@@ -44,7 +44,7 @@ func TestRenderNote(t *testing.T) {
 
 func TestRenderNotes(t *testing.T) {
 	tpl := New(".")
-  ts, _ := time.Parse(time.RFC822, "11 Nov 79 22:23 MSK")
+  ts, _ := time.Parse(time.RFC822, "04 Nov 79 22:23 MSK")
 
 	notes := []*model.Note{}
 
@@ -64,13 +64,13 @@ func TestRenderNotes(t *testing.T) {
 <body>
 <div class="note">
   <div class="title">first</div>
-  <div class="date">1979-11-11 22:23:00 &#43;0000 MSK</div>
+  <div class="date">04/11/1979</div>
   <div class="body">first content</div>
 </div>
 
 <div class="note">
   <div class="title">second</div>
-  <div class="date">1979-11-11 22:23:00 &#43;0000 MSK</div>
+  <div class="date">04/11/1979</div>
   <div class="tags"><div class="tag">саптрю</div><div class="tag">слушаю</div></div>
   <div class="body">second content</div>
 </div>

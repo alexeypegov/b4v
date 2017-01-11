@@ -1,7 +1,7 @@
 {{- define "note"}}
 <div class="note">
   <div class="title">{{.Title}}</div>
-  <div class="date">{{.CreatedAt}}</div>
+  <div class="date">{{timestamp .CreatedAt}}</div>
   {{- if .Tags}}
   <div class="tags">
     {{- range .Tags -}}
