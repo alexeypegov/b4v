@@ -1,69 +1,79 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"log"
 	"net/http"
-	"os"
 
 	"github.com/alexeypegov/b4v/controller"
 	"github.com/alexeypegov/b4v/model"
+	"github.com/alexeypegov/b4v/templates"
 	"github.com/bmizerany/pat"
 	"github.com/urfave/negroni"
+	"github.com/golang/glog"
 )
 
-const (
-	port   = 8080
-	dbFile = "./b4v.db"
+var (
+	port          int
+	importPath    string
+	databasePath  string
+	templatesPath string
 )
 
 type handler struct {
 	*controller.Context
-	H func(w http.ResponseWriter, r *http.Request, ctx *controller.Context) (int, error)
+	Handler func(w http.ResponseWriter, r *http.Request, ctx *controller.Context) (int, error)
+}
+
+func init() {
+	flag.IntVar(&port, "port", 8080, "server port")
+	flag.StringVar(&importPath, "import", "", "old format json data filename")
+	flag.StringVar(&databasePath, "db", "./b4v.db", "database path")
+	flag.StringVar(&templatesPath, "templates", "./templates", "path to template files")
 }
 
 func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	status, err := h.H(w, r, h.Context)
+	status, err := h.Handler(w, r, h.Context)
 	if err != nil {
 		switch status {
 		case http.StatusNotFound:
 			http.NotFound(w, r)
 			break
 		default:
-			log.Printf("HTTP %d: %q", status, err)
+			glog.Infof("HTTP %d: %q", status, err)
 			break
 		}
 	}
 }
 
 func main() {
-	db, err := model.OpenDB(dbFile)
+	flag.Parse()
+
+	db, err := model.OpenDB(databasePath)
 	if err != nil {
-		panic(err)
+		glog.Fatal("Unable to initialize db", err)
 	}
 	defer db.Close()
 
-	if len(os.Args) == 2 {
-		fmt.Print(fmt.Sprintf("Using import file '%s'... ", os.Args[1]))
-		notesCount, err := model.Populate(os.Args[1], db)
+	if len(importPath) > 0 {
+		glog.Infof("Using import file '%s'... ", importPath)
+		notesCount, err := model.Populate(importPath, db)
 		if err != nil {
-			fmt.Println(fmt.Sprintf("fail (%s)", err.Error()))
-			return
+			glog.Fatal(err)
 		}
 
-		fmt.Println(fmt.Sprintf("ok [%d notes]", notesCount))
+		glog.Infof("ok [%d notes]", notesCount)
 	}
 
-	fmt.Print("Rebuilding index... ")
+	glog.Info("Rebuilding index... ")
 	if err := model.RebuildIndex(db); err != nil {
-		fmt.Println(fmt.Sprintf("fail (%s)", err.Error()))
-		return
+		glog.Fatal(err)
 	}
+	glog.Info("ok")
 
-	fmt.Println("ok")
-
-	context := &controller.Context{DB: db}
+	context := &controller.Context{DB: db, Template: templates.New("./templates")}
 	mux := pat.New()
+	mux.Get("/", handler{context, controller.IndexHandler})
 	mux.Get("/note/:id", handler{context, controller.NoteHandler})
 	n := negroni.Classic()
 	n.UseHandler(mux)

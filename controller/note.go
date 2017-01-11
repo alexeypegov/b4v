@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/alexeypegov/b4v/model"
+	"github.com/alexeypegov/b4v/templates"
 )
 
 // NoteHandler handles note requests
@@ -16,10 +17,12 @@ func NoteHandler(w http.ResponseWriter, r *http.Request, ctx *Context) (int, err
 
 	note, err := model.GetNote(id, ctx.DB)
 	if err != nil {
-		fmt.Fprintf(w, "Not found %v\n", note.Title)
 		return http.StatusNotFound, err
 	}
 
-	fmt.Fprintf(w, "Hello %v\n", note.Title)
+	if err := ctx.Template.ExecuteTemplate(w, "index.tpl", &templates.Data{Note: note}); err != nil {
+		return http.StatusInternalServerError, err
+	}
+
 	return http.StatusOK, nil
 }
