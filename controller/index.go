@@ -18,7 +18,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request, ctx *Context) (int, er
     return http.StatusInternalServerError, err
   }
 
-  if err := ctx.Template.ExecuteTemplate(w, "index.tpl", &templates.Data{Notes: notes}); err != nil {
+  if err := ctx.Template.ExecuteTemplate(w, "index.tpl", &templates.Data{Notes: notes, Vars: ctx.Vars}); err != nil {
     return http.StatusInternalServerError, err
   }
 

@@ -17,6 +17,12 @@ const (
 type Data struct {
 	Notes []*model.Note
 	Note  *model.Note
+	Vars  *Vars
+}
+
+// Vars contrains general blog info for templates
+type Vars struct {
+	Title string
 }
 
 var funcMap = template.FuncMap{

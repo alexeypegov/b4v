@@ -1,4 +1,3 @@
 data/
-*.*~
-b4v
+server/server
 *.db

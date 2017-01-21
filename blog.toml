@@ -1,0 +1,6 @@
+port = 8080
+database = "./b4v.db"
+templates = "./templates"
+
+[vars]
+title = "Blog v4"

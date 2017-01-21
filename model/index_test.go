@@ -55,7 +55,7 @@ func TestPagesCount(t *testing.T) {
 	db := NewTestDB()
 	defer CloseAndDestroy(db)
 
-	if err := (&Note{Title: "One", CreatedAt: time.Now().AddDate(0, 0, 1)}).Save(false, db); err != nil {
+	if err := (&Note{Title: "One", CreatedAt: time.Now().Add(10 * time.Minute)}).Save(false, db); err != nil {
 			t.Error("Unable to save note One")
 	}
 
