@@ -40,10 +40,8 @@ func TestRenderNote(t *testing.T) {
 	ts, _ := time.Parse(time.RFC822, "04 Nov 79 22:23 MSK")
 	note := &model.Note{Title: "first", Content: "<h1>first content</h1>", Tags: []string{"саптрю", "слушаю"}, CreatedAt: ts}
 
-	vars := &Vars{Title: "Title"}
-
 	w := bytes.NewBufferString("")
-	if err := tpl.ExecuteTemplate(w, "index.tpl", Data{Note: note, Vars: vars}); err != nil {
+	if err := tpl.ExecuteTemplate(w, "note", note); err != nil {
 		t.Error(err)
 	}
 
@@ -59,9 +57,8 @@ func TestRenderNotes(t *testing.T) {
 	notes = append(notes, &model.Note{Title: "first", Content: "first content", CreatedAt: ts})
 	notes = append(notes, &model.Note{Title: "second", Content: "second content", Tags: []string{"саптрю", "слушаю"}, CreatedAt: ts})
 
-	vars := &Vars{Title: "Title"}
 	w := bytes.NewBufferString("")
-	if err := tpl.ExecuteTemplate(w, "index.tpl", Data{Notes: notes, Vars: vars}); err != nil {
+	if err := tpl.ExecuteTemplate(w, "notes", notes); err != nil {
 		t.Error(err)
 	}
 

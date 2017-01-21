@@ -2,6 +2,7 @@
 <div class="note">
   <div class="title">{{.Title}}</div>
   <div class="date">{{timestamp .CreatedAt}}</div>
+  <div class="body">{{html .Content}}</div>
   {{- if .Tags}}
   <div class="tags">
     {{- range .Tags -}}
@@ -9,8 +10,12 @@
     {{- end -}}
   </div>
   {{- end}}
-  <div class="body">{{html .Content}}</div>
 </div>
+{{end -}}
+{{- define "notes"}}
+{{- range . -}}
+{{- template "note" . -}}
+{{- end -}}
 {{end -}}
 <!doctype html>
 <html>
@@ -22,9 +27,7 @@
 {{- if .Note -}}
 {{- template "note" .Note -}}
 {{- else if .Notes -}}
-{{- range .Notes -}}
-{{- template "note" . -}}
-{{- end -}}
+{{- template "notes" .Notes -}}
 {{- end -}}
 </body>
 </html>
