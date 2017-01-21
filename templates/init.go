@@ -22,7 +22,8 @@ type Data struct {
 
 // Vars contrains general blog info for templates
 type Vars struct {
-	Title string
+	Title     string
+	Copyright string
 }
 
 var funcMap = template.FuncMap{

@@ -1,15 +1,15 @@
 package templates
 
 import (
-	"fmt"
 	"bytes"
-	"testing"
-	"time"
-  "strconv"
-	"runtime"
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
+	"runtime"
+	"strconv"
 	"strings"
+	"testing"
+	"time"
 
 	"github.com/alexeypegov/b4v/model"
 )
@@ -17,7 +17,7 @@ import (
 func getTestData(ext string) string {
 	pc, path, _, _ := runtime.Caller(2)
 	parts := strings.Split(runtime.FuncForPC(pc).Name(), ".")
-	funcName := parts[len(parts) - 1][4:] // skip Test prefix
+	funcName := parts[len(parts)-1][4:] // skip Test prefix
 	filename := fmt.Sprintf("%s/test_data/%s.%s", filepath.Dir(path), funcName, ext)
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -38,7 +38,12 @@ func TestRenderNote(t *testing.T) {
 	tpl := New(".")
 
 	ts, _ := time.Parse(time.RFC822, "04 Nov 79 22:23 MSK")
-	note := &model.Note{Title: "first", Content: "<h1>first content</h1>", Tags: []string{"саптрю", "слушаю"}, CreatedAt: ts}
+	note := &model.Note{
+		UUID:      "first",
+		Title:     "first",
+		Content:   "<h1>first content</h1>",
+		Tags:      []string{"саптрю", "слушаю"},
+		CreatedAt: ts}
 
 	w := bytes.NewBufferString("")
 	if err := tpl.ExecuteTemplate(w, "note", note); err != nil {
@@ -50,12 +55,22 @@ func TestRenderNote(t *testing.T) {
 
 func TestRenderNotes(t *testing.T) {
 	tpl := New(".")
-  ts, _ := time.Parse(time.RFC822, "04 Nov 79 22:23 MSK")
+	ts, _ := time.Parse(time.RFC822, "04 Nov 79 22:23 MSK")
 
 	notes := []*model.Note{}
 
-	notes = append(notes, &model.Note{Title: "first", Content: "first content", CreatedAt: ts})
-	notes = append(notes, &model.Note{Title: "second", Content: "second content", Tags: []string{"саптрю", "слушаю"}, CreatedAt: ts})
+	notes = append(notes, &model.Note{
+		UUID:      "first",
+		Title:     "first",
+		Content:   "first content",
+		CreatedAt: ts})
+
+	notes = append(notes, &model.Note{
+		UUID:      "second",
+		Title:     "second",
+		Content:   "second content",
+		Tags:      []string{"саптрю", "слушаю"},
+		CreatedAt: ts})
 
 	w := bytes.NewBufferString("")
 	if err := tpl.ExecuteTemplate(w, "notes", notes); err != nil {

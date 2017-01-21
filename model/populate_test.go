@@ -13,7 +13,7 @@ func TestUnmarshalling(t *testing.T) {
 {
 	"title": "GoGo Penguin Live from Old Grenada Studios",
 	"date" : "29 Ноября 2016",
-	"url"  : "/note/gogo-penguin-live-from-old-grenada-studios",
+	"url"  : "/note/%D0%BF%D0%B5%D1%80%D0%B2%D1%8B%D0%B9-%D0%BA%D0%BB%D0%B0%D1%81%D1%81",
 	"tags" : ["слушаю"],
 	"content": "<div></div>"
 }]`)
@@ -45,7 +45,7 @@ func TestUnmarshalling(t *testing.T) {
 		t.Error("Error unmarshalling tags", note.Tags)
 	}
 
-	if "gogo-penguin-live-from-old-grenada-studios" != note.UUID {
+	if "первый-класс" != note.UUID {
 		t.Error("Error unmarshalling UUID", note.UUID)
 	}
 }

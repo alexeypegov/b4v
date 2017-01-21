@@ -10,13 +10,16 @@ func TestSaveAndLoad(t *testing.T) {
 	db := NewTestDB()
 	defer CloseAndDestroy(db)
 
-	note := Note{UUID: "something-interesting", Title: "title", Content: "Some content"}
+	note := Note{
+		UUID:    "локальзованный-урл",
+		Title:   "title",
+		Content: "Some content"}
 
 	if err := note.Save(true, db); err != nil {
 		t.Error("Unable to save note:", err)
 	}
 
-	loaded, err := GetNote("something-interesting", db)
+	loaded, err := GetNote("локальзованный-урл", db)
 	if err != nil {
 		t.Error(err)
 	}
@@ -35,12 +38,12 @@ func TestNotExistingNote(t *testing.T) {
 		t.Error("Unable to save note:", err)
 	}
 
-	loaded, err := GetNote("not-existing", db)
+	_, err := GetNote("not-existing", db)
 	if err != nil {
-		t.Error("Error loading Note")
-	}
-
-	if len(loaded.UUID) > 0 {
+		if err.Error() != "Note not found 'not-existing'" {
+			t.Fatal("Error loading Note:", err)
+		}
+	} else {
 		t.Error("Inexisting note was found")
 	}
 }

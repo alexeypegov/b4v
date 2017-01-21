@@ -1,6 +1,6 @@
 {{- define "note"}}
 <div class="note">
-  <div class="title">{{.Title}}</div>
+  <div class="title"><a href="/note/{{.UUID}}">{{.Title}}</a></div>
   <div class="date">{{timestamp .CreatedAt}}</div>
   <div class="body">{{html .Content}}</div>
   {{- if .Tags}}
@@ -29,5 +29,6 @@
 {{- else if .Notes -}}
 {{- template "notes" .Notes -}}
 {{- end -}}
+<div class="footer">&copy;&nbsp;{{.Vars.Copyright}}</div>
 </body>
 </html>

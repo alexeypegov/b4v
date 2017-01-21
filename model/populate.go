@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"strings"
 	"time"
 
@@ -99,7 +100,13 @@ func ConvertNotes(notes []oldNote) []Note {
 }
 
 func (n *oldNote) toNote() Note {
-	return Note{UUID: n.UUID, Title: n.Title, Content: n.Content, Tags: n.Tags, CreatedAt: n.Date, Flags: PlainHTML}
+	return Note{
+		UUID:      n.UUID,
+		Title:     n.Title,
+		Content:   n.Content,
+		Tags:      n.Tags,
+		CreatedAt: n.Date,
+		Flags:     PlainHTML}
 }
 
 func (n *oldNote) UnmarshalJSON(j []byte) error {
@@ -150,7 +157,12 @@ func (n *oldNote) UnmarshalJSON(j []byte) error {
 
 			var uuid string
 			fmt.Sscanf(s, "/note/%s", &uuid)
-			n.UUID = uuid
+			unescaped, err := url.QueryUnescape(uuid)
+			if err != nil {
+				return err
+			}
+
+			n.UUID = unescaped
 			break
 		case "tags":
 			arr, ok := v.([]interface{})

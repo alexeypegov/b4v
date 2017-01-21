@@ -51,6 +51,10 @@ func (db *DB) Get(bucket string, id string) ([]byte, error) {
 		}
 
 		result = _bucket.Get([]byte(id))
+		if len(result) == 0 {
+			result = nil
+		}
+
 		return nil
 	})
 

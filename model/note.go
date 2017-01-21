@@ -61,6 +61,10 @@ func GetNote(uuid string, db *DB) (*Note, error) {
 		return nil, err
 	}
 
+	if bytes == nil {
+		return nil, fmt.Errorf("Note not found '%s'", uuid)
+	}
+
 	result := new(Note)
 	json.Unmarshal(bytes, &result)
 	return result, nil
