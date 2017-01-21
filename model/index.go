@@ -11,7 +11,14 @@ import (
 const (
 	notesPerPage = 10
 	pagesBucket  = "pages"
+	indexBucket  = "index"
+	metaKey      = "meta"
 )
+
+// Meta misc blog info structure
+type Meta struct {
+	PagesCount int
+}
 
 // RebuildIndex completeky rebuilds index from scratch
 func RebuildIndex(db *DB) error {
@@ -71,16 +78,32 @@ func RebuildIndex(db *DB) error {
 		}
 
 		tx.DeleteBucket([]byte(pagesBucket))
-		bucketPages, err := tx.CreateBucketIfNotExists([]byte(pagesBucket))
-		if err != nil {
+		if err := WithNewBucket(tx, pagesBucket, func(bucket *bolt.Bucket) error {
+			for k, v := range pagesMap {
+				bytes, _ := json.Marshal(v)
+				if err := bucket.Put([]byte(k), []byte(bytes)); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		}); err != nil {
 			return err
 		}
 
-		for k, v := range pagesMap {
-			bytes, _ := json.Marshal(v)
-			if err := bucketPages.Put([]byte(k), []byte(bytes)); err != nil {
+		meta := new(Meta)
+		meta.PagesCount = page + 1
+
+		tx.DeleteBucket([]byte(indexBucket))
+		if err := WithNewBucket(tx, indexBucket, func(bucket *bolt.Bucket) error {
+			bytes, _ := json.Marshal(meta)
+			if err := bucket.Put([]byte(metaKey), []byte(bytes)); err != nil {
 				return err
 			}
+
+			return nil
+		}); err != nil {
+			return err
 		}
 
 		return nil
@@ -89,6 +112,37 @@ func RebuildIndex(db *DB) error {
 	}
 
 	return nil
+}
+
+// GetMeta returns structure with blog meta info
+func GetMeta(db *DB) (*Meta, error) {
+	var meta *Meta
+	if err := db.View(func(tx *bolt.Tx) error {
+		indexBucket := tx.Bucket([]byte(indexBucket))
+		if indexBucket != nil {
+			bytes := indexBucket.Get([]byte(metaKey))
+			meta = new(Meta)
+			if  err := json.Unmarshal(bytes, &meta); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return meta, nil
+}
+
+// GetPagesCount returns number of pages
+func GetPagesCount(db *DB) (int, error) {
+	meta, err := GetMeta(db)
+	if err != nil {
+		return -1, err
+	}
+
+	return meta.PagesCount, nil
 }
 
 // GetNotes returns list of notes fot the given page number

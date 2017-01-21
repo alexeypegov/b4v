@@ -27,6 +27,20 @@ func (db *DB) Close() {
 	}
 }
 
+// BucketFunc callback function for the newly created bucket
+type BucketFunc func(bucket *bolt.Bucket) error
+
+// WithNewBucket will create a new bucket and pass it to a given callback function
+func WithNewBucket(tx *bolt.Tx, name string, callback BucketFunc) error {
+	bucket, err := tx.CreateBucket([]byte(name))
+	if err != nil {
+		return err
+	}
+
+	callback(bucket)
+	return nil
+}
+
 // Get load entry from bucket
 func (db *DB) Get(bucket string, id string) ([]byte, error) {
 	var result []byte

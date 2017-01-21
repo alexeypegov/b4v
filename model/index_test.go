@@ -50,3 +50,29 @@ func TestBuildIndex(t *testing.T) {
 		t.Errorf("Error fetching notes for page %d (len() = %d)!", 0, len(after))
 	}
 }
+
+func TestPagesCount(t *testing.T) {
+	db := NewTestDB()
+	defer CloseAndDestroy(db)
+
+	if err := (&Note{Title: "One", CreatedAt: time.Now().AddDate(0, 0, 1)}).Save(false, db); err != nil {
+			t.Error("Unable to save note One")
+	}
+
+	if err := (&Note{Title: "Two", CreatedAt: time.Now()}).Save(false, db); err != nil {
+		t.Error("Unable to save note Two")
+	}
+
+	if err := RebuildIndex(db); err != nil {
+		t.Error(err)
+	}
+
+	count, error := GetPagesCount(db)
+	if error != nil {
+		t.Error("Error getting pages count")
+	}
+
+	if count != 1 {
+		t.Errorf("Should be exactly 1 page, got %d instead!", count)
+	}
+}
