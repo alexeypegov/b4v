@@ -33,6 +33,12 @@ var funcMap = template.FuncMap{
 	"timestamp": func(ts time.Time) string {
 		return fmt.Sprintf("%02d/%02d/%4d", ts.Day(), ts.Month(), ts.Year())
 	},
+	"minus": func(a, b int) int {
+		return a - b
+	},
+	"plus": func(a, b int) int {
+		return a + b
+	},
 }
 
 // New initializes templates

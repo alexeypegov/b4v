@@ -17,6 +17,16 @@
 {{- template "note" . -}}
 {{- end -}}
 {{end -}}
+{{- define "paging-start" -}}
+{{- if gt .Paging.Current 1 -}}
+<div class="paging"><a href="/page/{{ minus .Paging.Current 1 }}">{{- .Vars.PreviousPage -}}</a></div>
+{{ end -}}
+{{- end -}}
+{{- define "paging-end" -}}
+{{- if lt .Paging.Current .Paging.Total -}}
+<div class="paging"><a href="/page/{{ plus .Paging.Current 1 }}">{{- .Vars.NextPage -}}</a></div>
+{{ end -}}
+{{- end -}}
 <!doctype html>
 <html>
 <head>
@@ -27,7 +37,9 @@
 {{- if .Note -}}
 {{- template "note" .Note -}}
 {{- else if .Notes -}}
+{{- template "paging-start" . -}}
 {{- template "notes" .Notes -}}
+{{- template "paging-end" . -}}
 {{- end -}}
 <div class="footer">&copy;&nbsp;{{.Vars.Copyright}}</div>
 </body>
