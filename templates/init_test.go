@@ -131,6 +131,10 @@ func TestPaginationStart2(t *testing.T) {
 	paginationTest("paging-start", 2, 2, t)
 }
 
+func TestPaginationStart3(t *testing.T) {
+	paginationTest("paging-start", 3, 3, t)
+}
+
 func TestPaginationEnd1(t *testing.T) {
 	paginationTest("paging-end", 1, 1, t)
 }
@@ -157,7 +161,7 @@ func TestFullPage(t *testing.T) {
 		Title:     "second",
 		Content:   "second content",
 		Tags:      []string{"саптрю", "слушаю"},
-		CreatedAt: time.Now().Add(10 * time.Minute)})
+		CreatedAt: ts.Add(10 * time.Minute)})
 
 	data := map[string]interface{}{
 		"Notes": notes,

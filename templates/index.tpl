@@ -18,9 +18,13 @@
 {{- end -}}
 {{end -}}
 {{- define "paging-start" -}}
-{{- if gt .Paging.Current 1 -}}
+{{- if eq .Paging.Current 2 -}}
+<div class="paging"><a href="/">{{- .Vars.PreviousPage -}}</a></div>
+{{ else -}}
+{{- if gt .Paging.Current 2 -}}
 <div class="paging"><a href="/page/{{ minus .Paging.Current 1 }}">{{- .Vars.PreviousPage -}}</a></div>
 {{ end -}}
+{{- end -}}
 {{- end -}}
 {{- define "paging-end" -}}
 {{- if lt .Paging.Current .Paging.Total -}}
