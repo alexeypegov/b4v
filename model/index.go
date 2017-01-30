@@ -58,7 +58,7 @@ func RebuildIndex(db *DB) error {
 		pagesMap := make(map[string][]string)
 		// tags := make(map[string][]*Note)
 
-		page := 0
+		page := 1
 		pageKey := fmt.Sprintf("page-%d", page)
 
 		bucketNotes := tx.Bucket([]byte(NotesBucket))
@@ -92,7 +92,7 @@ func RebuildIndex(db *DB) error {
 		}
 
 		meta := new(Meta)
-		meta.PagesCount = page + 1
+		meta.PagesCount = page
 
 		tx.DeleteBucket([]byte(indexBucket))
 		if err := WithNewBucket(tx, indexBucket, func(bucket *bolt.Bucket) error {

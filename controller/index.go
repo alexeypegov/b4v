@@ -11,14 +11,24 @@ import (
 // IndexHandler handles index page
 func IndexHandler(w http.ResponseWriter, r *http.Request, ctx *Context) (int, error) {
   pageString := r.URL.Query().Get(":page")
-  page, _ := strconv.Atoi(pageString)
+  page, err := strconv.Atoi(pageString)
+	if err != nil {
+		page = 1
+	}
 
   notes, err := model.GetNotes(page, ctx.DB)
   if err != nil {
     return http.StatusInternalServerError, err
   }
 
-  if err := ctx.Template.ExecuteTemplate(w, "index.tpl", &templates.Data{Notes: notes, Vars: ctx.Vars}); err != nil {
+	total, err := model.GetPagesCount(ctx.DB)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	paging := &templates.Paging{Current: page, Total: total}
+	data := &templates.Data{Notes: notes, Vars: ctx.Vars, Paging: paging}
+  if err := ctx.Template.ExecuteTemplate(w, "index.tpl", data); err != nil {
     return http.StatusInternalServerError, err
   }
 

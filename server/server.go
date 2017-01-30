@@ -19,7 +19,7 @@ type Config struct {
 	Port      int
 	Database  string
 	Templates string
-	Vars      templates.Vars `toml:"vars"`
+	Vars      map[string]string `toml:"vars"`
 }
 
 var (
@@ -85,9 +85,10 @@ func main() {
 	context := &controller.Context{
 		DB: db,
 		Template: templates.New(config.Templates),
-		Vars: &config.Vars}
+		Vars: config.Vars}
 	mux := pat.New()
 	mux.Get("/", handler{context, controller.IndexHandler})
+	mux.Get("/page/:page", handler{context, controller.IndexHandler})
 	mux.Get("/note/:id", handler{context, controller.NoteHandler})
 	n := negroni.Classic()
 	n.UseHandler(mux)

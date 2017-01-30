@@ -19,22 +19,22 @@
 {{end -}}
 {{- define "paging-start" -}}
 {{- if eq .Paging.Current 2 -}}
-<div class="paging"><a href="/">{{- .Vars.PreviousPage -}}</a></div>
+<div class="paging"><a href="/">{{- .Vars.previous_page -}}</a></div>
 {{ else -}}
 {{- if gt .Paging.Current 2 -}}
-<div class="paging"><a href="/page/{{ minus .Paging.Current 1 }}">{{- .Vars.PreviousPage -}}</a></div>
+<div class="paging"><a href="/page/{{ minus .Paging.Current 1 }}">{{- .Vars.previous_page -}}</a></div>
 {{ end -}}
 {{- end -}}
 {{- end -}}
 {{- define "paging-end" -}}
 {{- if lt .Paging.Current .Paging.Total -}}
-<div class="paging"><a href="/page/{{ plus .Paging.Current 1 }}">{{- .Vars.NextPage -}}</a></div>
+<div class="paging"><a href="/page/{{ plus .Paging.Current 1 }}">{{- .Vars.next_page -}}</a></div>
 {{ end -}}
 {{- end -}}
 <!doctype html>
 <html>
 <head>
-  <title>{{.Vars.Title}}</title>
+  <title>{{.Vars.title}}</title>
   <link rel="stylesheet" type="text/css" href="/css/blog.css"/>
 </head>
 <body>
@@ -45,6 +45,6 @@
 {{- template "notes" .Notes -}}
 {{- template "paging-end" . -}}
 {{- end -}}
-<div class="footer">&copy;&nbsp;{{.Vars.Copyright}}</div>
+<div class="footer">&copy;&nbsp;{{.Vars.copyright}}</div>
 </body>
 </html>

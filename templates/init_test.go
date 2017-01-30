@@ -106,8 +106,8 @@ func paginationTest(template string, page, total int, t *testing.T) {
 
 	data := map[string]interface{}{
 		"Vars": map[string]string{
-			"PreviousPage": "prev",
-			"NextPage":     "next",
+			"previous_page": "prev",
+			"next_page":     "next",
 		},
 		"Paging": map[string]int{
 			"Current": page,
@@ -166,8 +166,8 @@ func TestFullPage(t *testing.T) {
 	data := map[string]interface{}{
 		"Notes": notes,
 		"Vars": map[string]string{
-			"PreviousPage": "prev",
-			"NextPage":     "next",
+			"previous_page": "prev",
+			"next_page":     "next",
 		},
 		"Paging": map[string]int{
 			"Current": 1,

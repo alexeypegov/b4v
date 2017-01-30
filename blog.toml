@@ -5,3 +5,5 @@ templates = "./templates"
 [vars]
 title = "Blog v4"
 copyright = "Алексей Пегов 2009–2017"
+previous_page = "Более свежие"
+next_page = "Более старые"

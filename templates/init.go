@@ -13,17 +13,18 @@ const (
 	ext = ".tpl"
 )
 
-// Data for templates
-type Data struct {
-	Notes []*model.Note
-	Note  *model.Note
-	Vars  *Vars
+// Paging contains paging info
+type Paging struct {
+	Current int
+	Total   int
 }
 
-// Vars contrains general blog info for templates
-type Vars struct {
-	Title     string
-	Copyright string
+// Data for templates
+type Data struct {
+	Notes  []*model.Note
+	Note   *model.Note
+	Vars   map[string]string
+	Paging *Paging
 }
 
 var funcMap = template.FuncMap{

@@ -41,7 +41,7 @@ func TestBuildIndex(t *testing.T) {
 		t.Error(err)
 	}
 
-	after, err := GetNotes(0, db)
+	after, err := GetNotes(1, db)
 	if err != nil {
 		t.Error(err)
 	}
