@@ -19,7 +19,7 @@ func TestFailOnDuplicateDates(t *testing.T) {
 	note1.Save(false, db)
 	note2.Save(false, db)
 
-	if err := RebuildIndex(db); err == nil || !strings.HasPrefix(err.Error(), "Duplicate note found") {
+	if err := RebuildIndex(10, db); err == nil || !strings.HasPrefix(err.Error(), "Duplicate note found") {
 		t.Errorf("Should fail on duplicate dates! %s", err.Error())
 	}
 }
@@ -32,12 +32,13 @@ func TestBuildIndex(t *testing.T) {
 		t.Error("There should be no notes yet")
 	}
 
+	at, _ := time.Parse(time.RFC822, "11 Nov 79 00:00 MSK")
 	for i := 0; i < 15; i++ {
-		at, _ := time.Parse(time.RFC822, fmt.Sprintf("11 Nov 79 %02d:23 MSK", i))
+		at = at.Add(10 * time.Minute)
 		(&Note{Title: fmt.Sprintf("Title %d", i), CreatedAt: at}).Save(false, db)
 	}
 
-	if err := RebuildIndex(db); err != nil {
+	if err := RebuildIndex(10, db); err != nil {
 		t.Error(err)
 	}
 
@@ -55,15 +56,13 @@ func TestPagesCount(t *testing.T) {
 	db := NewTestDB()
 	defer CloseAndDestroy(db)
 
-	if err := (&Note{Title: "One", CreatedAt: time.Now().Add(10 * time.Minute)}).Save(false, db); err != nil {
-			t.Error("Unable to save note One")
+	at, _ := time.Parse(time.RFC822, "11 Nov 79 00:00 MSK")
+	for i := 0; i < 15; i++ {
+		at = at.Add(10 * time.Minute)
+		(&Note{Title: fmt.Sprintf("Title %d", i), CreatedAt: at}).Save(false, db)
 	}
 
-	if err := (&Note{Title: "Two", CreatedAt: time.Now()}).Save(false, db); err != nil {
-		t.Error("Unable to save note Two")
-	}
-
-	if err := RebuildIndex(db); err != nil {
+	if err := RebuildIndex(5, db); err != nil {
 		t.Error(err)
 	}
 
@@ -72,7 +71,7 @@ func TestPagesCount(t *testing.T) {
 		t.Error("Error getting pages count")
 	}
 
-	if count != 1 {
-		t.Errorf("Should be exactly 1 page, got %d instead!", count)
+	if count != 3 {
+		t.Errorf("Should be exactly 3 pages, got %d instead!", count)
 	}
 }

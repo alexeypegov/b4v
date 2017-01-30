@@ -9,7 +9,6 @@ import (
 )
 
 const (
-	notesPerPage = 10
 	pagesBucket  = "pages"
 	indexBucket  = "index"
 	metaKey      = "meta"
@@ -21,7 +20,7 @@ type Meta struct {
 }
 
 // RebuildIndex completeky rebuilds index from scratch
-func RebuildIndex(db *DB) error {
+func RebuildIndex(notesPerPage int, db *DB) error {
 	var timestamps []int
 	notesMap := make(map[int]string)
 
@@ -75,6 +74,11 @@ func RebuildIndex(db *DB) error {
 					pageKey = fmt.Sprintf("page-%d", page)
 				}
 			}
+		}
+
+		_, ok := pagesMap[pageKey]
+		if !ok {
+			page--
 		}
 
 		tx.DeleteBucket([]byte(pagesBucket))

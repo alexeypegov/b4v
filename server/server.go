@@ -16,10 +16,11 @@ import (
 
 // Config contains all of the blog configuration parameters
 type Config struct {
-	Port      int
-	Database  string
-	Templates string
-	Vars      map[string]string `toml:"vars"`
+	Port         int
+	Database     string
+	Templates    string
+	NotesPerPage int               `toml:"notes_per_page"`
+	Vars         map[string]string `toml:"vars"`
 }
 
 var (
@@ -77,15 +78,15 @@ func main() {
 	}
 
 	glog.Info("Rebuilding index... ")
-	if err := model.RebuildIndex(db); err != nil {
+	if err := model.RebuildIndex(config.NotesPerPage, db); err != nil {
 		glog.Fatal(err)
 	}
 	glog.Info("ok")
 
 	context := &controller.Context{
-		DB: db,
+		DB:       db,
 		Template: templates.New(config.Templates),
-		Vars: config.Vars}
+		Vars:     config.Vars}
 	mux := pat.New()
 	mux.Get("/", handler{context, controller.IndexHandler})
 	mux.Get("/page/:page", handler{context, controller.IndexHandler})

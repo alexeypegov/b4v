@@ -1,6 +1,7 @@
 port = 8080
 database = "./b4v.db"
 templates = "./templates"
+notes_per_page = 10
 
 [vars]
 title = "Blog v4"
