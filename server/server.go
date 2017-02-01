@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/BurntSushi/toml"
 	"github.com/alexeypegov/b4v/controller"
@@ -12,6 +13,7 @@ import (
 	"github.com/bmizerany/pat"
 	"github.com/golang/glog"
 	"github.com/urfave/negroni"
+	"github.com/tylerb/graceful"
 )
 
 // Config contains all of the blog configuration parameters
@@ -98,5 +100,12 @@ func main() {
 	mux.Get("/note/:id", handler{context, controller.NoteHandler})
 	n.UseHandler(mux)
 
-	n.Run(fmt.Sprintf(":%d", config.Port))
+	server := &graceful.Server{
+		Timeout: 5 * time.Second,
+		Server: &http.Server{
+			Addr: fmt.Sprintf(":%d", config.Port),
+			Handler: n},
+	}
+	
+	server.ListenAndServe()
 }
