@@ -55,6 +55,8 @@ func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	defer glog.Flush()
+
 	flag.Parse()
 
 	if _, err := toml.DecodeFile(configPath, &config); err != nil {
@@ -87,11 +89,14 @@ func main() {
 		DB:       db,
 		Template: templates.New(config.Templates),
 		Vars:     config.Vars}
+
+	n := negroni.New(negroni.NewRecovery(), NewLogMiddleware(0), negroni.NewStatic(http.Dir("public")))
+
 	mux := pat.New()
 	mux.Get("/", handler{context, controller.IndexHandler})
 	mux.Get("/page/:page", handler{context, controller.IndexHandler})
 	mux.Get("/note/:id", handler{context, controller.NoteHandler})
-	n := negroni.Classic()
 	n.UseHandler(mux)
+
 	n.Run(fmt.Sprintf(":%d", config.Port))
 }
