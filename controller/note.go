@@ -20,7 +20,7 @@ func NoteHandler(w http.ResponseWriter, r *http.Request, ctx *Context) (int, err
 		return http.StatusNotFound, err
 	}
 
-	if err := ctx.Template.ExecuteTemplate(w, "index.tpl", &templates.Data{Note: note, Vars: ctx.Vars}); err != nil {
+	if err := ctx.Template.ExecuteTemplate(w, templates.Template, &templates.Data{Note: note, Vars: ctx.Vars}); err != nil {
 		return http.StatusInternalServerError, err
 	}
 

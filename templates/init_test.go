@@ -56,7 +56,7 @@ func assertEquals(s string, t *testing.T) {
 }
 
 func TestRenderNote(t *testing.T) {
-	tpl := New(".")
+	tpl := New("..")
 
 	ts, _ := time.Parse(time.RFC822, "04 Nov 79 22:23 MSK")
 	note := &model.Note{
@@ -75,7 +75,7 @@ func TestRenderNote(t *testing.T) {
 }
 
 func TestRenderNotes(t *testing.T) {
-	tpl := New(".")
+	tpl := New("..")
 	ts, _ := time.Parse(time.RFC822, "04 Nov 79 22:23 MSK")
 
 	notes := []*model.Note{}
@@ -102,7 +102,7 @@ func TestRenderNotes(t *testing.T) {
 }
 
 func paginationTest(template string, page, total int, t *testing.T) {
-	tpl := New(".")
+	tpl := New("..")
 
 	data := map[string]interface{}{
 		"Vars": map[string]string{
@@ -144,7 +144,7 @@ func TestPaginationEnd2(t *testing.T) {
 }
 
 func TestFullPage(t *testing.T) {
-	tpl := New(".")
+	tpl := New("..")
 
 	ts, _ := time.Parse(time.RFC822, "04 Nov 79 22:23 MSK")
 
@@ -176,7 +176,7 @@ func TestFullPage(t *testing.T) {
 	}
 
 	w := bytes.NewBufferString("")
-	if err := tpl.ExecuteTemplate(w, "index.tpl", data); err != nil {
+	if err := tpl.ExecuteTemplate(w, "blog.tpl", data); err != nil {
 		t.Fatal(err)
 	}
 

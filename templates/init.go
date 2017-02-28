@@ -11,6 +11,9 @@ import (
 
 const (
 	ext = ".tpl"
+
+	// Template name of the template to use
+	Template = "blog.tpl"
 )
 
 // Paging contains paging info

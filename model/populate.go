@@ -43,7 +43,7 @@ func Populate(filename string, db *DB) (int, error) {
 	if err := db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(NotesBucket))
 		if bucket != nil {
-			return fmt.Errorf("Existing Notes bucket was found")
+			return fmt.Errorf("Import error: existing notes bucket was found, skipping...")
 		}
 
 		return nil

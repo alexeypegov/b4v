@@ -1,33 +1,35 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
+	"path/filepath"
 	"time"
 
 	"github.com/BurntSushi/toml"
 	"github.com/alexeypegov/b4v/controller"
 	"github.com/alexeypegov/b4v/model"
 	"github.com/alexeypegov/b4v/templates"
+	"github.com/alexeypegov/b4v/util"
 	"github.com/bmizerany/pat"
 	"github.com/golang/glog"
 	"github.com/urfave/negroni"
-	"github.com/tylerb/graceful"
 )
 
 // Config contains all of the blog configuration parameters
 type Config struct {
-	Port         int
-	Database     string
-	Templates    string
 	NotesPerPage int               `toml:"notes_per_page"`
 	Vars         map[string]string `toml:"vars"`
 }
 
 var (
+	dataPath   string
 	importPath string
-	configPath string
+	port       int
 
 	config Config
 )
@@ -38,8 +40,9 @@ type handler struct {
 }
 
 func init() {
-	flag.StringVar(&configPath, "config", "./blog.toml", "specify blog configuration path")
-	flag.StringVar(&importPath, "import", "", "old format json data filename")
+	flag.StringVar(&dataPath, "data", "./data", "override blog data path")
+	flag.IntVar(&port, "port", 8080, "override server port")
+	flag.StringVar(&importPath, "import", "", "import old format json data filename")
 }
 
 func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -61,11 +64,7 @@ func main() {
 
 	flag.Parse()
 
-	if _, err := toml.DecodeFile(configPath, &config); err != nil {
-		glog.Fatalln("Unable to read config file!\n", err)
-	}
-
-	db, err := model.OpenDB(config.Database)
+	db, err := model.OpenDB(filepath.Join(dataPath, "notes.db"))
 	if err != nil {
 		glog.Fatalln("Unable to initialize database!\n", err)
 	}
@@ -75,10 +74,14 @@ func main() {
 		glog.Infof("Using import file '%s'... ", importPath)
 		notesCount, err := model.Populate(importPath, db)
 		if err != nil {
-			glog.Fatal(err)
+			glog.Warning(err)
+		} else {
+			glog.Infof("ok [%d notes]", notesCount)
 		}
+	}
 
-		glog.Infof("ok [%d notes]", notesCount)
+	if _, err := toml.DecodeFile("blog.toml", &config); err != nil {
+		glog.Fatalln("Unable to read config file!\n", err)
 	}
 
 	glog.Info("Rebuilding index... ")
@@ -87,25 +90,37 @@ func main() {
 	}
 	glog.Info("ok")
 
-	context := &controller.Context{
+	ctx := &controller.Context{
 		DB:       db,
-		Template: templates.New(config.Templates),
+		Template: templates.New("."),
 		Vars:     config.Vars}
 
-	n := negroni.New(negroni.NewRecovery(), NewLogMiddleware(0), negroni.NewStatic(http.Dir("public")))
+	n := negroni.New(negroni.NewRecovery(), util.NewLogMiddleware(0), negroni.NewStatic(http.Dir("public")))
 
 	mux := pat.New()
-	mux.Get("/", handler{context, controller.IndexHandler})
-	mux.Get("/page/:page", handler{context, controller.IndexHandler})
-	mux.Get("/note/:id", handler{context, controller.NoteHandler})
+	mux.Get("/", handler{ctx, controller.IndexHandler})
+	mux.Get("/page/:page", handler{ctx, controller.IndexHandler})
+	mux.Get("/note/:id", handler{ctx, controller.NoteHandler})
 	n.UseHandler(mux)
 
-	server := &graceful.Server{
-		Timeout: 5 * time.Second,
-		Server: &http.Server{
-			Addr: fmt.Sprintf(":%d", config.Port),
-			Handler: n},
+	stopChan := make(chan os.Signal)
+	signal.Notify(stopChan, os.Interrupt)
+
+	server := &http.Server{
+		Addr:    fmt.Sprintf(":%d", port),
+		Handler: n,
 	}
-	
-	server.ListenAndServe()
+
+	go func() {
+		if err := server.ListenAndServe(); err != nil {
+			glog.Error(err)
+		}
+	}()
+
+	<-stopChan
+	_ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	server.Shutdown(_ctx)
+
+	glog.Info("Server was shutdown gracefully")
 }

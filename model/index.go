@@ -129,6 +129,8 @@ func GetMeta(db *DB) (*Meta, error) {
 			if  err := json.Unmarshal(bytes, &meta); err != nil {
 				return err
 			}
+		} else {
+			return fmt.Errorf("Index bucket was not found")
 		}
 
 		return nil
