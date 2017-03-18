@@ -30,8 +30,7 @@ var (
 	dataPath   string
 	importPath string
 	port       int
-
-	config Config
+	config     Config
 )
 
 type handler struct {
@@ -101,6 +100,7 @@ func main() {
 	mux.Get("/", handler{ctx, controller.IndexHandler})
 	mux.Get("/page/:page", handler{ctx, controller.IndexHandler})
 	mux.Get("/note/:id", handler{ctx, controller.NoteHandler})
+	mux.Get("/rss", handler{ctx, controller.RssHandler})
 	n.UseHandler(mux)
 
 	stopChan := make(chan os.Signal)

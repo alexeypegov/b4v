@@ -1,9 +1,12 @@
 package model
 
 import (
+	"encoding/xml"
 	"fmt"
 	"testing"
 	"time"
+	
+	"github.com/alexeypegov/b4v/test"
 )
 
 func TestSaveAndLoad(t *testing.T) {
@@ -111,4 +114,40 @@ func TestAssignUUID(t *testing.T) {
 	if "nope" != loaded.Content {
 		t.Errorf("Content is different from the expected one, found: '%s'", loaded.Content)
 	}
+}
+
+func TestToRss(t *testing.T) {
+	db := NewTestDB()
+	defer CloseAndDestroy(db)
+
+	ts, _ := time.Parse(time.RFC822, "11 Nov 79 22:23 MSK")
+
+	note := Note{
+		UUID:      "локальзованный-урл",
+		Title:     "title",
+		Content:   "Some content",
+		CreatedAt: ts,
+		Tags:      []string{"a", "b"},
+	}
+
+	if err := note.Save(true, db); err != nil {
+		t.Error("Unable to save note:", err)
+	}
+
+	rss := note.ToRSS("http://localhost/")
+
+	ba, err := xml.MarshalIndent(rss, "", "  ")
+	if err != nil {
+		t.Fatal("Unable to marshal item to RSS")
+	}
+
+	expected := `<item>
+  <guid isPermaLink="true">http://localhost/локальзованный-урл</guid>
+  <title>title</title>
+  <category>a,b</category>
+  <pubDate>Sun, 11 Nov 1979 22:23:00 +0300</pubDate>
+  <description><![CDATA[Some content]]></description>
+</item>`
+	
+	test.AssertEquals(expected, string(ba), t)
 }

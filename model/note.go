@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"regexp"
 	"strings"
@@ -35,6 +36,27 @@ type Note struct {
 	Tags      []string  `json:"tags"`
 	CreatedAt time.Time `json:"created_at"`
 	Flags     byte      `json:"flags"`
+}
+
+type rssGUID struct {
+	XMLName     xml.Name `xml:"guid"`
+	IsPermaLink bool     `xml:"isPermaLink,attr"`
+	Data        string   `xml:",chardata"`
+}
+
+type rssDescription struct {
+	XMLName xml.Name `xml:"description"`
+	Data    string   `xml:",cdata"`
+}
+
+// RssItem one single RSS item
+type RssItem struct {
+	XMLName     xml.Name `xml:"item"`
+	GUID        rssGUID
+	Title       string         `xml:"title"`
+	Category    string         `xml:"category"`
+	PubDate     string         `xml:"pubDate"`
+	Description rssDescription `xml:"description"`
 }
 
 // SaveAll save all the given Notes
@@ -112,4 +134,20 @@ func (note *Note) Save(draft bool, db *DB) error {
 	}
 
 	return nil
+}
+
+// ToRSS convert note to RSS item
+func (note *Note) ToRSS(baseURL string) RssItem {
+	return RssItem{
+		GUID: rssGUID{
+			IsPermaLink: true,
+			Data:        fmt.Sprintf("%s%s", baseURL, note.UUID),
+		},
+		Title:       note.Title,
+		Category:    strings.Join(note.Tags, ","),
+		PubDate:     note.CreatedAt.Format(time.RFC1123Z),
+		Description: rssDescription{
+			Data: note.Content,
+		},
+	}
 }

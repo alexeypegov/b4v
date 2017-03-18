@@ -38,6 +38,7 @@
   <link rel="stylesheet" type="text/css" href="/css/blog.css"/>
 </head>
 <body>
+<div class="head">{{.Vars.title}}</div>
 {{- if .Note -}}
 {{- template "note" .Note -}}
 {{- else if .Notes -}}
