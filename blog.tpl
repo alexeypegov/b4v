@@ -36,6 +36,8 @@
 <head>
   <title>{{.Vars.title}}</title>
   <link rel="stylesheet" type="text/css" href="/css/blog.css"/>
+  <link rel="icon" type="image/png" href="/img/favicon.png"/>
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http://feeds.feedburner.com/false-movement"/>
 </head>
 <body>
 <div class="head">{{.Vars.title}}</div>

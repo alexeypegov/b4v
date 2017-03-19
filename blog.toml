@@ -1,7 +1,9 @@
 notes_per_page = 10
 
 [vars]
-url = "http://blog.alexeypegov.com/"
+url = "http://blog.alexeypegov.com"
+rss = "http://feeds.feedburner.com/false-movement"
+rss_image = "/img/favicon.png"
 title = "Ложное движение"
 copyright = "Алексей Пегов 2009–2017"
 previous_page = "Более свежие"

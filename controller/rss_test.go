@@ -22,19 +22,25 @@ func TestRss(t *testing.T) {
   notes := make([]*model.Note, 1)
   notes[0] = &note
   
-  ba, err := generateRss(notes, "title", "http://localhost/", "description")
+  ba, err := generateRss(notes, "title", "http://localhost", "description", "/img/favicon.png", "/rss")
   if err != nil {
     t.Fatal("Unable to generate RSS")
   }
   
-  expected := `<rss version="2.0">
+  expected := `<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>title</title>
-    <link>http://localhost/</link>
+    <link>http://localhost</link>
     <description>description</description>
     <ttl>60</ttl>
+    <image>
+      <url>http://localhost/img/favicon.png</url>
+      <title>title</title>
+      <link>http://localhost</link>
+    </image>
+    <atom:link href="/rss" rel="self" type="application/rss+xml"></atom:link>
     <item>
-      <guid isPermaLink="true">http://localhost/локальзованный-урл</guid>
+      <guid isPermaLink="true">http://localhost/note/локальзованный-урл</guid>
       <title>title</title>
       <category>a,b</category>
       <pubDate>Sun, 11 Nov 1979 22:23:00 +0300</pubDate>
