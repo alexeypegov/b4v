@@ -40,7 +40,7 @@
   <link rel="alternate" type="application/rss+xml" title="RSS" href="http://feeds.feedburner.com/false-movement"/>
 </head>
 <body>
-<div class="head">{{.Vars.title}}</div>
+<div class="head"><a href="/">{{.Vars.title}}</a></div>
 {{- if .Note -}}
 {{- template "note" .Note -}}
 {{- else if .Notes -}}
